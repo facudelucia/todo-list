@@ -1,26 +1,74 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Task, TodoAppState } from './interfaces';
+import TaskInput from './components/TaskInput';
+import AddTaskButton from './components/AddTaskButton';
+import TaskList from './components/TaskList';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Hello World
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class TodoApp extends React.Component<{}, TodoAppState> {
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      tasks: [],
+      newTaskText: '',
+      errorMessage: ''
+    };
+  }
+
+  addTask = (): void => {
+    if (this.state.newTaskText.trim() === '') {
+      this.setState({
+        errorMessage: 'Cannot be empty'
+      })
+      return
+    }
+
+    const newTask: Task = {
+      text: this.state.newTaskText,
+      completed: false
+    }
+
+    this.setState({
+      tasks: [...this.state.tasks, newTask],
+      newTaskText: ''
+    })
+  };
+
+  toggleTask = (index: number): void => {
+    const tasks = this.state.tasks
+    const task = tasks[index];
+    if (task) {
+      tasks[index] = { ...task, completed: !task.completed };
+      this.setState({
+        tasks: tasks,
+      });
+    }
+  };
+
+  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    if (event.target.value.trim() !== '') {
+      this.setState({
+        errorMessage: '',
+        newTaskText: event.target.value
+      })
+    }
+  };
+
+  render() {
+    const incompleteTasks = this.state.tasks.filter((task) => !task.completed).length;
+    return (
+      <div className="container">
+        <h1 data-testid="test-title">Todo List</h1>
+        <TaskInput
+          value={this.state.newTaskText}
+          onChange={this.handleInputChange}
+        />
+        {this.state.errorMessage && <p className="error-message">{this.state.errorMessage}</p>}
+        <AddTaskButton onClick={this.addTask} />
+        <TaskList tasks={this.state.tasks} toggleTask={this.toggleTask} />
+        <p>Incomplete tasks: {incompleteTasks}</p>
+      </div>
+    );
+  }
 }
 
-export default App;
+export default TodoApp;
