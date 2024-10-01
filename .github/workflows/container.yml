@@ -3,7 +3,7 @@ name: deploy-todo-list
 on:
   push:
     branches:
-      - main|
+      - main
     paths:
       - 'src/**'
 
